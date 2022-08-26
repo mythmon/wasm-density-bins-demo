@@ -1,0 +1,14 @@
+[package]
+name = "density_bins"
+description = "A test of speeding density calculation with wasm"
+repository = "https://github.com/mythmon/density-bins"
+license = "ISC"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+rand = "0.8.5"
+wasm-bindgen = "0.2.82"
