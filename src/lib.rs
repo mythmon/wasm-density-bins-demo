@@ -1,30 +1,44 @@
-//! Based on https://observablehq.com/@yurivish/zig-density-plot-prototype
+#![deny(clippy::all)]
+#![warn(clippy::pedantic)]
+#![allow(
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss,
+    clippy::cast_precision_loss
+)]
+
+//! Based on <https://observablehq.com/@yurivish/zig-density-plot-prototype>
 
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
-pub fn density_1d_core(xs: &[f64], bin_count: usize) -> Vec<u64> {
-    let mut bins = Vec::with_capacity(bin_count);
-    bins.resize(bin_count, 0);
+#[must_use]
+pub fn density_1d_core(xs: &[f64], bin_count: usize) -> Vec<f64> {
+    let mut bins = vec![0_f64; bin_count];
     let (min, max) = extent(xs).unwrap_or((0_f64, 1_f64));
     let scale = bin_scale(bin_count, min, max);
     for x in xs {
-        bins[bin_index(*x, min, scale)] += 1;
+        bins[bin_index(*x, min, scale)] += 1_f64;
     }
     bins
 }
 
 fn extent<T>(xs: &[T]) -> Option<(T, T)>
-where T: PartialOrd + Copy {
-    if xs.is_empty() {
-        None
-    } else {
-        let mut min = xs[0];
-        let mut max = xs[0];
-        for x in &xs[1..] {
-            if *x < min { min = *x } else if *x > max { max = *x }
+where
+    T: PartialOrd + Copy,
+{
+    if let Some(v) = xs.get(0) {
+        let mut min = *v;
+        let mut max = *v;
+        for x in xs.iter().skip(1) {
+            if *x < min {
+                min = *x
+            } else if *x > max {
+                max = *x
+            }
         }
         Some((min, max))
+    } else {
+        None
     }
 }
 
@@ -42,7 +56,7 @@ fn bin_index(value: f64, min: f64, scale: f64) -> usize {
 
 #[cfg(test)]
 mod tests {
-    use crate::{bin_scale, bin_index, extent};
+    use crate::{bin_index, bin_scale, extent};
 
     #[test]
     fn test_bin_index() {
